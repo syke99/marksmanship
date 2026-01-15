@@ -1,10 +1,14 @@
 package marksmanship
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 type gun struct {
 	// TODO: implement this type
-	metricsClient any // use what i built at work as inspiration
+	metricsClient any               // use what i built at work as inspiration
+	impacts       map[string]func() // method-keyed span.End() calls
 }
 
 type Gun interface {
@@ -17,10 +21,17 @@ type Gun interface {
 	// TODO: errors and global metrics
 	// TODO: here
 	Calibrate(svc any)
-	// Load is used to create a bullet (otel
+	// Load is used to create a magazine (otel
 	// tracer) with the provided name and
 	// inject it into the context to be used
 	Load(ctx context.Context, name string)
+	// Fire is used to start a span and also begin
+	// the latency histogram metric. It is intended
+	// to be used inside a method that was registered
+	// by a call to Load(). To end the span, you simply
+	// defer a call to Impact() immediately after you
+	// call this method
+	Fire(ctx context.Context, now time.Time) Round
 }
 
 func GrabGun() Gun {
@@ -45,11 +56,30 @@ func (g *gun) Calibrate(svc any) {
 	// TODO: be able to register any global metrics
 }
 
-// Load is used to create a bullet (otel
+// Load is used to create a magazine (otel
 // tracer) with the provided name and
 // inject it into the context to be used
 func (g *gun) Load(ctx context.Context, name string) {
 	// TODO: here is where you'll create the tracer and
 	// TODO: inject it into the context to be used later
 	// TODO: on
+}
+
+// Fire is used to start a span and also begin
+// the latency histogram metric. It is intended
+// to be used inside a method that was registered
+// by a call to Load(). To end the span, you simply
+// defer a call to Impact() immediately after you
+// call this method
+func (g *gun) Fire(ctx context.Context, now time.Time) Round {
+	// TODO: here is where you'll grab the name of
+	// TODO: the method that called Fire()
+
+	// TODO: here is where the span is started and the
+	// TODO: latency histogram is started
+	return &round{
+		impact: func() {
+			// TODO: span.End() will go here
+		},
+	}
 }
